@@ -1,5 +1,4 @@
 import {Link, useParams, useNavigate} from "react-router";
-import {resumes} from "../../constants";
 import {useEffect, useState} from "react";
 import {usePuterStore} from "~/lib/puter";
 import Summary from "~/components/Summary";
@@ -10,7 +9,6 @@ export const meta = () => ([
     { title: 'Resumind | Review' },
     { name: 'description', content: 'Detailed overview of your resume' },
 ])
-
 
 const Resume = () => {
     const { auth, isLoading, fs, kv } = usePuterStore();
@@ -31,13 +29,15 @@ const Resume = () => {
             if(!resume) return;
 
             const data = JSON.parse(resume);
+            console.log('feedback from KV →', data.feedback, typeof data.feedback);
+
 
             const resumeBlob = await fs.read(data.resumePath);
             if(!resumeBlob) return;
 
             const pdfBlob = new Blob([resumeBlob], { type: 'application/pdf' });
             const resumeUrl = URL.createObjectURL(pdfBlob);
-            setResumesUrl(resumeUrl)
+            setResumesUrl(resumeUrl);
 
             const imageBlob = await fs.read(data.imagePath);
             if(!imageBlob) return;
@@ -45,7 +45,7 @@ const Resume = () => {
             setImageUrl(imageUrl);
 
             setFeedback(data.feedback);
-            console.log({ resumeUrl, imageUrl, feedback: data.feedback});
+            console.log({ resumeUrl, imageUrl, feedback: data.feedback });
         }
         loadResume();
     }, [id]);
@@ -76,11 +76,9 @@ const Resume = () => {
                     <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
                     {feedback ? (
                         <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
-                            Summary ATS Details
-                            <Summary feedback={feedback}/>
+                            <Summary feedback={feedback} />
                             <ATS score={feedback.ATS.score || 0} suggestions={feedback.ATS.tips || []} />
                             <Details feedback={feedback} />
-
                         </div>
                     ) : (
                         <img src="/images/resume-scan-2.gif" className="w-full" />
